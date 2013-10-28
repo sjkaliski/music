@@ -24,7 +24,7 @@
 
 /**
  * @fileoverview Promise based spotify search client.
- * @author Steve Kaliski <sjkaliski@gmail.com>
+ * @author Steve Kaliski <steve@bowery.io>
  */
 
 
@@ -97,9 +97,7 @@ SpotifySearch.prototype._printData = function (json) {
   var defer = Q.defer()
   var tracks = this.tracks = json.tracks.track.slice(0, 10)
   var index = 0;
-  var maxTitleLength = Math.max.apply(Math, tracks.map(function (t) {
-    return t.name[0].length
-  }))
+  var maxTitleLength = Math.max.apply(Math, tracks.map(function (t) {return t.name[0].length}))
 
   tracks.forEach(function (track) {
     var titleLengthDiff = maxTitleLength - track.name[0].length

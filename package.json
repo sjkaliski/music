@@ -1,13 +1,24 @@
 {
-  "name": "spotify-search",
-  "description": "Search and Control Spotify via the CLI",
+  "name": "music",
+  "description": "Search and Control Music via the CLI",
   "version": "0.0.3",
-  "author": "Steve Kaliski <sjkaliski@gmail.com>",
+  "author": [
+    {
+      "name": "Steve Kaliski",
+      "email": "steve@bowery.io"
+    },
+    {
+      "name": "David Byrd",
+      "email": "byrd@bowery.io"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/sjkaliski/spotify-cli.git"
+    "url": "http://github.com/sjkaliski/music.git"
   },
   "keywords": [
+    "music",
+    "rdio",
     "spotify",
     "cli"
   ],
@@ -19,7 +30,7 @@
     "kew": "~0.2.2"
   },
   "bin": {
-    "spotify": "./bin/spotify"
+    "music": "./bin/music"
   },
   "engines": {
     "node": ">= 0.8.x"
