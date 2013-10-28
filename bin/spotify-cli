@@ -1,0 +1,5 @@
+#!/usr/bin/env node
++function (args) {
+  var cmd = require('../commands/' + (args[0] || 'help'))
+  cmd(args.slice(1))
+}(process.argv.slice(2))
