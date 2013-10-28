@@ -1,8 +1,7 @@
 {
-  "name": "spotify",
-  "preferGlobal": "true",
+  "name": "spotify-search",
   "description": "Search and Control Spotify via the CLI",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "author": "Steve Kaliski <sjkaliski@gmail.com>",
   "repository": {
     "type": "git",

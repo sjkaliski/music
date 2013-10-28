@@ -67,6 +67,7 @@ function SpotifySearch (title) {
  */
 SpotifySearch.prototype._query = function (title) {
   var defer = Q.defer()
+  title = title.join(' ')
   console.log(colors.green('Looking up tracks for "' + title + '"...'))
   request('http://ws.spotify.com/search/1/track?q=' + title, defer.makeNodeResolver())
   return defer.promise
