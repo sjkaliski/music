@@ -133,7 +133,7 @@ SpotifySearch.prototype._promptUser = function () {
  * @private
  */
 SpotifySearch.prototype._playTrack = function (input) {
-  exec('open ' + this.tracks[--input['Track #']]['$'].href)
+  exec('osascript -e \'tell application "Spotify" to play track "' + this.tracks[--input['Track #']]['$'].href + '"\'')
 }
 
 
