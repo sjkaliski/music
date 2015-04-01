@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+var program = require('commander').parse(process.argv);
+
+// By default, commander splits the arguments. Let's join them.
+var search_string = program.args.join(' ');
+
+// We need a track to play. TODO: Play random song if no track?
+if (!search_string.length) {
+  console.error('Play what?');
+  process.exit(1);
+}
+
+require('../src/play')(search_string);

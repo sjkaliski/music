@@ -1,36 +1,32 @@
 #!/usr/bin/env node
 
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2013 David Byrd
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+var program = require('commander');
+var control = require('../src/control');
+
+program
+  .command('play [name]', 'search and play')
+  .command('.', 'play/pause track')
+  .command('..', 'next track')
+  .command('...', 'prvious track')
+  .command('info', 'display current track info')
+  .option('-v, --volume [N]', '[0..100] change volume')
+  .option('-b, --backward [N]', 'jump backward N seconds')
+  .option('-j, --jump [N]', 'jump to N seconds')
+  .option('-f, --forward [N]', 'jump forward N seconds')
+  .option('-s, --shuffle', 'Toggle shuffle')
+  .option('-r, --repeat', 'Toggle repeat');
 
 
-/**
- * @fileoverview executable for picking command.
- * @author David Byrd <byrd@bowery.io>
- */
+program.parse(process.argv);
 
 
-+function (args) {
-  var cmd = require('../commands/' + (args[0] || 'help'))
-  cmd(args.slice(1))
-}(process.argv.slice(2))
+if (program.shuffle)  control('shuffle');
+if (program.repeat)   control('repeat');
+if (program.jump)     control('jump', program.jump);
+if (program.volume)   control('volume', program.volume);
+if (program.forward)  control('forward', program.forward);
+if (program.backward) control('rewind', program.backward);
+
+if (!process.argv.slice(2).length) {
+    program.help();
+}

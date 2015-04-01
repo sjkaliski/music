@@ -1,3 +1,5 @@
+'use strict';
+/* global require, console, __dirname, module */
 /**
  * The MIT License (MIT)
  *
@@ -29,12 +31,13 @@
 
 
 // Module Dependencies.
-var request = require('request')
-var exec = require('child_process').exec
-var xmlToJSON = require('xml2js').parseString
-var prompt = require('prompt')
-var colors = require('colors')
-var Q = require('kew')
+var request = require('request');
+var exec = require('child_process').exec;
+var xmlToJSON = require('xml2js').parseString;
+var prompt = require('prompt');
+var colors = require('colors');
+var Q = require('kew');
+var control = require('./control');
 
 
 /**
@@ -46,7 +49,16 @@ function SpotifySearch (title) {
   /**
    * @public {Array} tracks.
    */
-  this.tracks = []
+  this.tracks = [];
+
+  /**
+   *  @public {string} track URI to play.
+   */
+  this.track = null;
+
+
+  this.control = 'osascript ' + 
+                (__dirname + '/SpotifyControl.scpt').replace(' ', '\\ ');
 
   // Query spotify, parse xml response, display in terminal,
   // prompt user for track number, play track.
@@ -54,8 +66,9 @@ function SpotifySearch (title) {
   .then(this._parseJSON.bind(this))
   .then(this._printData.bind(this))
   .then(this._promptUser.bind(this))
+  .then(this._getContext.bind(this))
   .then(this._playTrack.bind(this))
-  .fail(this._onError.bind(this))
+  .fail(this._onError.bind(this));
 }
 
 
@@ -66,12 +79,11 @@ function SpotifySearch (title) {
  * @private
  */
 SpotifySearch.prototype._query = function (title) {
-  var defer = Q.defer()
-  title = title.join(' ')
-  console.log(colors.green('Looking up tracks for "' + title + '"...'))
-  request('http://ws.spotify.com/search/1/track?q=' + title, defer.makeNodeResolver())
-  return defer.promise
-}
+  var defer = Q.defer();
+  console.log(colors.green('Looking up tracks for "' + title + '"...'));
+  request('http://ws.spotify.com/search/1/track?q=' + title, defer.makeNodeResolver());
+  return defer.promise;
+};
 
 
 /**
@@ -81,11 +93,11 @@ SpotifySearch.prototype._query = function (title) {
  * @private
  */
 SpotifySearch.prototype._parseJSON = function (res) {
-  var defer = Q.defer()
-  var body = res.body
-  xmlToJSON(body, defer.makeNodeResolver())
-  return defer.promise
-}
+  var defer = Q.defer();
+  var body = res.body;
+  xmlToJSON(body, defer.makeNodeResolver());
+  return defer.promise;
+};
 
 
 /**
@@ -94,24 +106,24 @@ SpotifySearch.prototype._parseJSON = function (res) {
  * @private
  */
 SpotifySearch.prototype._printData = function (json) {
-  var defer = Q.defer()
-  var tracks = this.tracks = json.tracks.track.slice(0, 10)
+  var defer = Q.defer();
+  var tracks = this.tracks = json.tracks.track.slice(0, 10);
   var index = 0;
-  var maxTitleLength = Math.max.apply(Math, tracks.map(function (t) {return t.name[0].length}))
+  var maxTitleLength = Math.max.apply(Math, tracks.map(function (t) {return t.name[0].length;}));
 
   tracks.forEach(function (track) {
-    var titleLengthDiff = maxTitleLength - track.name[0].length
-    var trackPadding = (titleLengthDiff) == 0 ? ' ' : new Array(titleLengthDiff + 2).join(' ')
+    var titleLengthDiff = maxTitleLength - track.name[0].length;
+    var trackPadding = (titleLengthDiff) === 0 ? ' ' : new Array(titleLengthDiff + 2).join(' ');
     var msg = colors.grey(++index) + (index < 10 ? '  ' : ' ') +
               colors.green(' Name: ') + 
               colors.underline(track.name[0]) + trackPadding +
               colors.green('Artist: ') +
-              colors.underline(track.artist[0].name[0])
-    console.log(msg)
-  })
+              colors.underline(track.artist[0].name[0]);
+    console.log(msg);
+  });
 
-  defer.resolve()
-}
+  defer.resolve();
+};
 
 
 /**
@@ -119,23 +131,36 @@ SpotifySearch.prototype._printData = function (json) {
  * @return {Promise}
  */
 SpotifySearch.prototype._promptUser = function () {
-  var defer = Q.defer()
-  prompt.message = prompt.delimiter = ''
-  prompt.start()
-  prompt.get('Track #', defer.makeNodeResolver())
-  return defer.promise
-}
+  var defer = Q.defer();
+  prompt.message = prompt.delimiter = '';
+  prompt.start();
+  prompt.get('Track #', defer.makeNodeResolver());
+  return defer.promise;
+};
 
 
 /**
  * Play selected track.
- * @param {string} track number.
+ * @param {object} API track object for selected track.
  * @private
  */
-SpotifySearch.prototype._playTrack = function (input) {
-  exec('osascript -e \'tell application "Spotify" to play track "' + this.tracks[--input['Track #']]['$'].href + '"\'')
-}
+SpotifySearch.prototype._playTrack = function (info) { 
+  control('playinalbum', this.track + ' ' + JSON.parse(info.body).track.album.href);
+};
 
+/**
+ * Get context for selected track
+ * @param  {string} input track number.
+ * @private
+ */
+SpotifySearch.prototype._getContext = function(input) {
+  
+  this.track = this.tracks[--input['Track #']]['$'].href;
+
+  var defer = Q.defer();
+  request('http://ws.spotify.com/lookup/1/.json?uri=' + this.track, defer.makeNodeResolver());
+  return defer.promise;
+};
 
 /**
  * Error handler.
@@ -143,13 +168,13 @@ SpotifySearch.prototype._playTrack = function (input) {
  * @private
  */
 SpotifySearch.prototype._onError = function (err) {
-  console.log(err)
-}
+  console.log(err);
+};
 
 
 /**
  * Module exports.
  */
 module.exports = function (title) {
-  return new SpotifySearch(title)
-}
+  return new SpotifySearch(title);
+};

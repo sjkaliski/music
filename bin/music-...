@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+var control = require('../src/control');
+control('prev');
