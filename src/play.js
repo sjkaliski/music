@@ -38,6 +38,7 @@ var prompt = require('prompt');
 var colors = require('colors');
 var Q = require('kew');
 var control = require('./control');
+var ellipsize = require('ellipsize');
 
 
 /**
@@ -55,10 +56,6 @@ function SpotifySearch (title) {
    *  @public {string} track URI to play.
    */
   this.track = null;
-
-
-  this.control = 'osascript ' + 
-                (__dirname + '/SpotifyControl.scpt').replace(' ', '\\ ');
 
   // Query spotify, parse xml response, display in terminal,
   // prompt user for track number, play track.
@@ -80,7 +77,7 @@ function SpotifySearch (title) {
  */
 SpotifySearch.prototype._query = function (title) {
   var defer = Q.defer();
-  console.log(colors.green('Looking up tracks for "' + title + '"...'));
+  console.log(colors.bold('Looking up tracks for "' + title + '"...'));
   request('http://ws.spotify.com/search/1/track?q=' + title, defer.makeNodeResolver());
   return defer.promise;
 };
@@ -107,18 +104,31 @@ SpotifySearch.prototype._parseJSON = function (res) {
  */
 SpotifySearch.prototype._printData = function (json) {
   var defer = Q.defer();
-  var tracks = this.tracks = json.tracks.track.slice(0, 10);
+  var tracks = this.tracks = json.tracks.track.slice(0, 10)
+  tracks = tracks.map(function (t) {
+    t.name[0] = ellipsize(t.name[0], 25); // Cut all tracks at 25 chars
+    t.artist[0].name[0] = ellipsize(t.artist[0].name[0], 25);
+    t.album[0].name[0] = ellipsize(t.album[0].name[0], 20);
+    return t
+  });
+
   var index = 0;
-  var maxTitleLength = Math.max.apply(Math, tracks.map(function (t) {return t.name[0].length;}));
+  var maxTitleLength  = Math.max.apply(Math, tracks.map(function (t) {return t.name[0].length;}));
+  var maxArtistLength = Math.max.apply(Math, tracks.map(function (t) {return t.artist[0].name[0].length;}));
 
   tracks.forEach(function (track) {
-    var titleLengthDiff = maxTitleLength - track.name[0].length;
+    var titleLengthDiff  = maxTitleLength  - track.name[0].length;
+    var artistLengthDiff = maxArtistLength - track.artist[0].name[0].length;
+
     var trackPadding = (titleLengthDiff) === 0 ? ' ' : new Array(titleLengthDiff + 2).join(' ');
-    var msg = colors.grey(++index) + (index < 10 ? '  ' : ' ') +
-              colors.green(' Name: ') + 
-              colors.underline(track.name[0]) + trackPadding +
-              colors.green('Artist: ') +
-              colors.underline(track.artist[0].name[0]);
+    var artistPadding = (artistLengthDiff) === 0 ? ' ' : new Array(artistLengthDiff + 2).join(' ');
+
+    var msg = 
+      (++index < 10 ? '  ' : ' ') + colors.grey(index + ': ') +
+      colors.underline(track.name[0]) + trackPadding + ' ' + artistPadding +
+      colors.green(track.artist[0].name[0]) + ' 💿  ' +
+      colors.underline(track.album[0].name[0])
+
     console.log(msg);
   });
 
