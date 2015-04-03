@@ -1,7 +1,7 @@
 {
   "name": "music",
   "description": "Search and Control Music via the CLI",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": [
     {
       "name": "Steve Kaliski",
@@ -28,8 +28,7 @@
     "ellipsize": "0.0.2",
     "kew": "~0.2.2",
     "prompt": "~0.2.11",
-    "request": "~2.27.0",
-    "xml2js": "~0.2.8"
+    "request": "~2.27.0"
   },
   "bin": {
     "music": "./bin/music"

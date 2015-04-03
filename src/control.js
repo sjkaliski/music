@@ -1,3 +1,6 @@
+'use strict';
+/* global require, module, console, __dirname */
+
 var exec    = require('child_process').exec;
 
 module.exports = function (cmd, arg, cb) {
@@ -5,15 +8,15 @@ module.exports = function (cmd, arg, cb) {
     arg = ' ' + arg;
   } else { arg = ''; }
 
-  var cb;
   if (cb === 'log') {
     cb = function (err, stdout, stderr) {
-      console.log(stdout);
-    }
+      console.log('stout: ' + stdout);
+      console.log('stderr: ' + stderr);
+    };
   }
 
   exec('osascript ' + 
          (__dirname + '/SpotifyControl.scpt').replace(' ', '\\ ') +
          ' ' + cmd + arg
       , cb);
-}
+};
