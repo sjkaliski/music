@@ -1,3 +1,11 @@
+# DEPRECATED
+
+The open version of the Spotify API this package used was [unforntuatly deprecated](https://ws.spotify.com/search/1/track.json?q=test) and so now this package doesn't work. The new API requires authentication, and so would require a large-ish overhaul.
+
+It is not out of the question, but given my music-listening patters, low priority for me at the moment. Sorry, and thanks for your interest (:
+
+-------------------------------
+
 # Music
 
 A fork of the excelent `npm i -g music`, using a modified version of dronir's SpotifyControl script for 10x more awesomeness.
